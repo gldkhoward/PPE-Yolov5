@@ -7,7 +7,6 @@ from PIL import Image
 def load_model(model_path):
     return torch.load(model_path, map_location=torch.device('cpu'))  # Load model from local path
 
-
 # Function to calculate Intersection over Union (IoU)
 def iou(box1, box2):
     x1_max = max(box1[0], box2[0])
@@ -24,7 +23,7 @@ def iou(box1, box2):
     
     return inter_area / union_area
 
-# Function to check if a person is wearing the required PPE
+# Function to check if a person is wearing the required PPE (simplified version)
 def check_ppe(detections, required_ppe):
     people = detections[detections['name'] == 'PERSON']
     ppe_items = detections[detections['name'].isin(required_ppe)]
@@ -42,7 +41,7 @@ def check_ppe(detections, required_ppe):
                 item_bbox = [item['xmin'], item['ymin'], item['xmax'], item['ymax']]
                 
                 # Check if the PPE's bounding box overlaps with the person’s bounding box
-                if iou(person_bbox, item_bbox) > 0.3:  # Simple IOU threshold
+                if iou(person_bbox, item_bbox) > 0.3:  # Simple IoU threshold for overlap
                     ppe_worn = True
                     break
             
@@ -74,3 +73,4 @@ def display_results(image_path, detections, compliance):
     plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     plt.axis('off')
     plt.show()
+

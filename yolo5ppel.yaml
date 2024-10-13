@@ -1,50 +1,51 @@
-# Ultralytics YOLOv5 🚀, AGPL-3.0 license
 
 # Parameters
 nc: 6 # number of classes
 depth_multiple: 1.0 # model depth multiple
 width_multiple: 1.0 # layer channel multiple
+
+#Custom anchor model for PPE
 anchors:
   - [36, 61, 53, 47, 87, 79]  # P3/8
   - [102, 181, 180, 160, 212, 352]  # P4/16
   - [150, 523, 246, 518, 398, 539]  # P5/32
 
 
-# YOLOv5 v6.0 backbone
+# Custom Backbone
 backbone:
   # [from, number, module, args]
   [
-    [-1, 1, Conv, [64, 6, 2, 2]], # 0-P1/2
-    [-1, 1, Conv, [128, 3, 2]], # 1-P2/4
-    [-1, 3, C3, [128]],
-    [-1, 1, Conv, [256, 3, 2]], # 3-P3/8
-    [-1, 6, C3, [256]],
-    [-1, 1, Conv, [512, 3, 2]], # 5-P4/16
-    [-1, 9, C3, [512]],
-    [-1, 1, Conv, [1024, 3, 2]], # 7-P5/32
-    [-1, 3, C3, [1024]],
-    [-1, 1, SPPF, [1024, 5]], # 9
+    [-1, 1, Conv, [64, 6, 2, 2]],  # 0-P1/2
+    [-1, 1, Conv, [128, 3, 2]],  # 1-P2/4
+    [-1, 5, C3, [128]],  # increase depth of C3 at P2 to capture more small-object features
+    [-1, 1, Conv, [256, 3, 2]],  # 3-P3/8
+    [-1, 7, C3, [256]],  # retain depth at P3
+    [-1, 1, Conv, [512, 3, 2]],  # 5-P4/16
+    [-1, 9, C3, [512]],  # retain depth at P4
+    [-1, 1, Conv, [1024, 3, 2]],  # 7-P5/32
+    [-1, 3, C3, [1024]],  # retain depth at P5
+    [-1, 1, SPPF, [1024, 5]],  # Spatial Pyramid Pooling (efficient feature aggregation)
   ]
 
-# YOLOv5 v6.0 head
+# Custom Model Head
 head: [
     [-1, 1, Conv, [512, 1, 1]],
     [-1, 1, nn.Upsample, [None, 2, "nearest"]],
-    [[-1, 6], 1, Concat, [1]], # cat backbone P4
-    [-1, 3, C3, [512, False]], # 13
+    [[-1, 6], 1, Concat, [1]],  # cat backbone P4
+    [-1, 4, C3, [512, False]],  # increase depth for small objects (better small-object detection)
 
     [-1, 1, Conv, [256, 1, 1]],
     [-1, 1, nn.Upsample, [None, 2, "nearest"]],
-    [[-1, 4], 1, Concat, [1]], # cat backbone P3
-    [-1, 3, C3, [256, False]], # 17 (P3/8-small)
+    [[-1, 4], 1, Concat, [1]],  # cat backbone P3 (small object detection)
+    [-1, 4, C3, [256, False]],  # emphasize small objects
 
     [-1, 1, Conv, [256, 3, 2]],
-    [[-1, 14], 1, Concat, [1]], # cat head P4
-    [-1, 3, C3, [512, False]], # 20 (P4/16-medium)
+    [[-1, 14], 1, Concat, [1]],  # cat head P4
+    [-1, 3, C3, [512, False]],  # standard medium object detection (P4/16)
 
     [-1, 1, Conv, [512, 3, 2]],
-    [[-1, 10], 1, Concat, [1]], # cat head P5
-    [-1, 3, C3, [1024, False]], # 23 (P5/32-large)
+    [[-1, 10], 1, Concat, [1]],  # cat head P5
+    [-1, 3, C3, [1024, False]],  # standard large object detection (P5/32)
 
-    [[17, 20, 23], 1, Detect, [nc, anchors]], # Detect(P3, P4, P5)
+    [[17, 20, 23], 1, Detect, [nc, anchors]],  # Detect(P3, P4, P5)
   ]

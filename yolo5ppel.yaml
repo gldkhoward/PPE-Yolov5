@@ -5,9 +5,9 @@ nc: 6 # number of classes
 depth_multiple: 1.0 # model depth multiple
 width_multiple: 1.0 # layer channel multiple
 anchors:
-  - [4, 5, 8, 10, 12, 16]  # P3/8 - Reduced for small objects
-  - [15, 25, 30, 40, 50, 60]  # P4/16 - Adjusted for medium objects
-  - [70, 90, 100, 120, 160, 200]  # P5/32 - Slightly larger for big objects
+  - [10, 13, 16, 30, 33, 23] # P3/8
+  - [30, 61, 62, 45, 59, 119] # P4/16
+  - [116, 90, 156, 198, 373, 326] # P5/32
 
 
 # YOLOv5 v6.0 backbone

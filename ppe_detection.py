@@ -5,7 +5,8 @@ from PIL import Image
 
 # Function to load the model
 def load_model(model_path):
-    return torch.hub.load('ultralytics/yolov5', 'custom', path=model_path)
+    return torch.load(model_path, map_location=torch.device('cpu'))  # Load model from local path
+
 
 # Function to calculate Intersection over Union (IoU)
 def iou(box1, box2):
